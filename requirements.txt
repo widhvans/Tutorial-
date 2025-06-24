@@ -1,2 +1,5 @@
 python-telegram-bot==20.8
 urllib3==2.2.3
+requests==2.31.0
+beautifulsoup4==4.12.3
+googlesearch-python==3.6.0
