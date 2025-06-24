@@ -5,7 +5,6 @@ from config import BOT_TOKEN, LINK_URL
 from googlesearch import search
 from bs4 import BeautifulSoup
 import requests
-import re
 
 # In-memory storage
 started_users = set()  # Tracks users who have used /start
@@ -17,7 +16,7 @@ DEFAULT_MODE = 'love'
 def get_app_poster(app_name):
     """Search for the app's feature graphic on Google Play."""
     try:
-        query = f"{app_name} site:play.google.com feature graphic"
+        query = f"{app_name} site:play.google.com"
         headers = {
             "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36"
         }
@@ -25,7 +24,6 @@ def get_app_poster(app_name):
             if "play.google.com" in url:
                 response = requests.get(url, headers=headers)
                 soup = BeautifulSoup(response.text, 'html.parser')
-                # Look for images that might be the feature graphic
                 img_tags = soup.find_all('img')
                 for img in img_tags:
                     src = img.get('src')
@@ -97,7 +95,7 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 async def button_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
-    if query.message is None:
+    if query is None or query.message is None:
         await query.answer()
         return
     user_id = query.from_user.id
@@ -122,9 +120,9 @@ def main():
 
     application.add_handler(CommandHandler("start", start))
     application.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_message))
-    application.add_handler(CallbackQueryHandler("button_callback", button_callback=button_callback))
+    application.add_handler(CallbackQueryHandler(button_callback))
 
     application.run_polling()
 
-__name__ == '__main__':
+if __name__ == '__main__':
     main()
