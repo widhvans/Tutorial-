@@ -1,32 +1,29 @@
 # bot.py
-import telegram
-from telegram.ext import Updater, CommandHandler, MessageHandler, Filters
-from telegram import InlineKeyboardButton, InlineKeyboardMarkup
+from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
+from telegram.ext import Application, CommandHandler, MessageHandler, filters, ContextTypes
 from config import BOT_TOKEN, LINK_URL
 
-def start(update, context):
-    send_link(update, context)
+async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    await send_link(update, context)
 
-def send_link(update, context):
+async def send_link(update: Update, context: ContextTypes.DEFAULT_TYPE):
     # Create a button with the link
     keyboard = [[InlineKeyboardButton("Open Link", url=LINK_URL)]]
     reply_markup = InlineKeyboardMarkup(keyboard)
-    
+
     # Send the message with the button
-    update.message.reply_text("Click the button below:", reply_markup=reply_markup)
+    await update.message.reply_text("Click the button below:", reply_markup=reply_markup)
 
 def main():
     # Initialize the bot
-    updater = Updater(BOT_TOKEN, use_context=True)
-    dp = updater.dispatcher
+    application = Application.builder().token(BOT_TOKEN).build()
 
     # Add handlers
-    dp.add_handler(CommandHandler("start", start))
-    dp.add_handler(MessageHandler(Filters.text & ~Filters.command, send_link))
+    application.add_handler(CommandHandler("start", start))
+    application.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, send_link))
 
     # Start the bot
-    updater.start_polling()
-    updater.idle()
+    application.run_polling()
 
 if __name__ == '__main__':
     main()
